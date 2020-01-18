@@ -60,6 +60,10 @@ class PurchaseDetailsComponent extends React.Component<PurchaseDetailsProps, Pur
                                 <th>Product Name:</th>
                                 <th>{this.props.purchase.productName}</th>
                             </tr>
+                            <tr>
+                                <th>Price:</th>
+                                <th>{this.props.purchase.price}</th>
+                            </tr>
                         </tbody>
                     </Table>
                 </Modal.Body>
