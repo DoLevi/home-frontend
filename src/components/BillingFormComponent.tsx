@@ -5,19 +5,19 @@ import {
     PurchaseControllerApi,
     Purchase,
     AuthorizedRequestobject,
-    AuthorizedRequestRestPurchase,
-    RestPurchase
+    RestPurchase,
+    AuthorizedRequestListRestPurchase
 } from '../api/api';
 import AuthFormComponent from './AuthFormComponent';
 import PurchaseFormComponent from './PurchaseFormComponent';
 import PurchaseTableComponent from './details/PurchaseTableComponent';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Modal } from 'react-bootstrap';
 
 
 type BillingFormComponentProps = {};
 
 type BillingFormComponentState = {
-    newPurchases: RestPurchase[],
+    newPurchase: RestPurchase,
     submissionResponse: any,
     showFullListAuth: boolean,
     fullPurchaseList: []
@@ -27,11 +27,11 @@ const api = new PurchaseControllerApi();
 
 
 class BillingFormComponent extends React.Component<BillingFormComponentProps, BillingFormComponentState> {
-    constructor(props: any) {
+    constructor(props: BillingFormComponentProps) {
         super(props);
 
         this.state = {
-            newPurchases: [],
+            newPurchase: new RestPurchase(),
             submissionResponse: {},
             showFullListAuth: false,
             fullPurchaseList: []
@@ -49,32 +49,28 @@ class BillingFormComponent extends React.Component<BillingFormComponentProps, Bi
         });
     }
 
-    handleSubmit(event: any, newPurchases: Purchase[]) {
+    handleSubmit(newPurchase: RestPurchase) {
         this.setState({
             ...this.state,
-            newPurchases: newPurchases
+            newPurchase: newPurchase
         });
     }
 
     handleSubmissionResponse(response: any) {
-        if (response.body !== undefined) {
-            alert(`Purchase '${response.body.productName}' (${response.body.price}) has been saved.`);
-        } else if (response.statusCode === 401) {
-            // TODO: a toast should appear here
-            alert('You have entered incorrect credentials!');
-        } else {
-            alert('There has been an error .-.');
-        }
+        alert(response);
+        this.setState({
+            ...this.state,
+            newPurchase: new RestPurchase()
+        });
     }
 
     handleFullListResponse(response: any) {
-        console.log(response);
-
         if (response.body && Array.isArray(response.body)) {
             const listInResponse = response.body.filter((entry: any) => entry instanceof Purchase);
 
             this.setState({
                 ...this.state,
+                showFullListAuth: false,
                 fullPurchaseList: listInResponse
             });
         }
@@ -86,7 +82,7 @@ class BillingFormComponent extends React.Component<BillingFormComponentProps, Bi
             <Container>
                 <Row>
                     <Col>
-                        <PurchaseFormComponent handlePurchaseSubmission={(event: any, newPurchases: Purchase[]) => this.handleSubmit(event, newPurchases)} />
+                        <PurchaseFormComponent handlePurchaseSubmission={(newPurchase: RestPurchase) => this.handleSubmit(newPurchase)} />
                     </Col>
                 </Row>
                 <Row>
@@ -104,16 +100,16 @@ class BillingFormComponent extends React.Component<BillingFormComponentProps, Bi
             </Container>
 
             <AuthFormComponent 
-                isShown = {() => this.state.newPurchases.length > 0}
-                hide = {() => this.setState({...this.state, newPurchases: []})}
-                getRequestObject = {() => this.state.newPurchases}
-                requestMethod = {(requestBody: AuthorizedRequestRestPurchase) => api.createPurchaseUsingPOST(requestBody)}
+                isShown = {() => Boolean(this.state.newPurchase.buyer)}  // TODO: make this less hacky
+                onHide = {() => { return; }}
+                getRequestObject = {() => [this.state.newPurchase]}
+                requestMethod = {(requestBody: AuthorizedRequestListRestPurchase) => api.createPurchaseUsingPOST(requestBody)}
                 handleResponse = {(response: any) => this.handleSubmissionResponse(response)}
                 />
 
             <AuthFormComponent
                 isShown = {() => this.state.showFullListAuth}
-                hide = {() => this.setState({...this.state, showFullListAuth: false})}
+                onHide = {() => this.setState({...this.state, showFullListAuth: false})}
                 getRequestObject = {() => undefined}
                 requestMethod = {(requestBody: AuthorizedRequestobject) => api.getAllPurchasesUsingPOST(requestBody)}
                 handleResponse = {(response: any) => this.handleFullListResponse(response)}

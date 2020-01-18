@@ -6,7 +6,7 @@ import { sha256 } from 'js-sha256';
 
 type AuthFormComponentProps = {
     isShown: Function,
-    hide: Function,
+    onHide: Function,
     getRequestObject: Function,
     requestMethod: Function,
     handleResponse: Function
@@ -47,6 +47,7 @@ class AuthFormComponent extends React.Component<AuthFormComponentProps, AuthForm
             } as AuthType,
             'requestObject': this.props.getRequestObject()
         }
+
         this.props.requestMethod(requestBody).then((response: any) => {
             this.props.handleResponse(response);
         }).catch((rejection: any) => {
@@ -56,7 +57,7 @@ class AuthFormComponent extends React.Component<AuthFormComponentProps, AuthForm
 
     render() {
         return (
-            <Modal show = {this.props.isShown()} onHide = {() => this.props.hide()}>
+            <Modal show = {this.props.isShown()} onHide = {() => this.props.onHide()}>
                 <Modal.Header closeButton>
                     <Modal.Title>Enter your credentials</Modal.Title>
                 </Modal.Header>

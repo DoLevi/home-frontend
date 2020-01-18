@@ -9,8 +9,7 @@ type PurchaseFormProps = {
 
 
 type PurchaseFormState = {
-    stashedPurchases: RestPurchase[],
-    currentPurchase: RestPurchase
+    newPurchase: RestPurchase
 };
 
 class PurchaseFormComponent extends React.Component<PurchaseFormProps, PurchaseFormState> {
@@ -18,17 +17,19 @@ class PurchaseFormComponent extends React.Component<PurchaseFormProps, PurchaseF
         super(props);
 
         this.state = {
-            stashedPurchases: [],
-            currentPurchase: new RestPurchase()
+            newPurchase: new RestPurchase()
         };
 
         this.handleChange = this.handleChange.bind(this);
+        this.handleFormSubmit = this.handleFormSubmit.bind(this);
     }
 
     handleChange(event: any) {
         this.setState({
-            ...this.state,
-            [event.target.name]: event.target.value
+            newPurchase: {
+                ...this.state.newPurchase,
+                [event.target.name]: event.target.value                
+            }
         });
     }
 
@@ -47,29 +48,9 @@ class PurchaseFormComponent extends React.Component<PurchaseFormProps, PurchaseF
         return undefined;
     }
 
-    stashPurchase(): void {
-        const newPurchase = this.state.currentPurchase;
-
-        this.setState({
-            stashedPurchases: [...this.state.stashedPurchases, newPurchase],
-            currentPurchase: new RestPurchase()
-        });
-    }
-
     handleFormSubmit(event: any) {
-        event.preventDefault();
-
-        switch (event.target.name) {
-            case 'nextPurchase':
-                this.stashPurchase();
-                break;
-            case 'finalSubmit':
-                console.log('Final submit:');
-                console.log(this.state);
-                this.props.handlePurchaseSubmission(event, this.state.stashedPurchases);
-            default:
-                console.log('Some software developer messed up...');
-        }
+        event.preventDefault();        
+        this.props.handlePurchaseSubmission(this.state.newPurchase);
     }
 
     render() {
@@ -82,7 +63,7 @@ class PurchaseFormComponent extends React.Component<PurchaseFormProps, PurchaseF
                         name="buyer"
                         placeholder="Buyer"
                         defaultValue={''}
-                        value={this.state.currentPurchase.buyer}
+                        value={this.state.newPurchase.buyer}
                         onChange={this.handleChange}
                         required />
                 </Form.Group>
@@ -94,7 +75,7 @@ class PurchaseFormComponent extends React.Component<PurchaseFormProps, PurchaseF
                         name="market"
                         placeholder="Market"
                         defaultValue={''}
-                        value={this.state.currentPurchase.market}
+                        value={this.state.newPurchase.market}
                         onChange={this.handleChange}
                         required />
                 </Form.Group>
@@ -105,7 +86,7 @@ class PurchaseFormComponent extends React.Component<PurchaseFormProps, PurchaseF
                         type="date"
                         name="dateBought"
                         defaultValue={''}
-                        value={this.state.currentPurchase.dateBought}
+                        value={this.state.newPurchase.dateBought}
                         onChange={this.handleChange}
                         required />
                 </Form.Group>
@@ -115,7 +96,7 @@ class PurchaseFormComponent extends React.Component<PurchaseFormProps, PurchaseF
                     <Form.Control
                         as="select"
                         name="productCategory"
-                        value={this.state.currentPurchase.productCategory?.toString()}
+                        value={this.state.newPurchase.productCategory?.toString()}
                         onChange={this.handleChange}
                         required>
                         <option key={undefined}></option>
@@ -138,7 +119,7 @@ class PurchaseFormComponent extends React.Component<PurchaseFormProps, PurchaseF
                         name="productName"
                         placeholder="Product Name"
                         defaultValue={''}
-                        value={this.state.currentPurchase.productName}
+                        value={this.state.newPurchase.productName}
                         onChange={this.handleChange}
                         required />
                 </Form.Group>
@@ -151,14 +132,12 @@ class PurchaseFormComponent extends React.Component<PurchaseFormProps, PurchaseF
                         name="price"
                         placeholder="Price"
                         defaultValue={''}
-                        value={this.state.currentPurchase.price?.toString()}
+                        value={this.state.newPurchase.price?.toString()}
                         onChange={this.handleChange}
                         required />
                 </Form.Group>
 
                 <Button variant="success" name="finalSubmit" type="submit">Submit</Button>
-
-                <Button variant="primary" name="nextPurchase" type="submit" style={{float: 'right'}}>Another!</Button>
             </Form>
         );
     }
